@@ -68,11 +68,7 @@ main { max-width:680px; margin:0 auto; padding-bottom:80px; }
 .rdr-title { font-family:'Newsreader',serif; font-size:24px; line-height:1.3; font-weight:700; color:var(--t1); margin-bottom:14px; }
 .rdr-time { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t3); display:block; margin-bottom:20px; }
 .rdr-hero { width:100%; max-height:240px; border-radius:10px; object-fit:cover; margin-bottom:20px; }
-.ai-box { background:var(--s2); border-left:3px solid var(--sport); border-radius:0 8px 8px 0; padding:16px; margin-bottom:24px; }
-.ai-lbl { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--t3); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
-.ai-badge { background:var(--sport); color:#080809; font-size:8px; font-weight:700; padding:2px 6px; border-radius:4px; }
-.ai-txt { font-family:'Newsreader',serif; font-size:14px; line-height:1.75; color:var(--t2); font-style:italic; }
-.ai-txt.dim { color:var(--t4); }
+
 .rdr-desc { font-family:'Newsreader',serif; font-size:16px; line-height:1.8; color:var(--t1); }
 .rdr-cta { display:block; text-align:center; padding:16px; margin-top:32px; background:var(--s2); border:1px solid var(--b1); border-radius:10px; text-decoration:none; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t2); letter-spacing:.08em; text-transform:uppercase; }
 .refresh-row { display:flex; align-items:center; justify-content:space-between; padding:10px 16px 0; }
@@ -116,10 +112,7 @@ main { max-width:680px; margin:0 auto; padding-bottom:80px; }
     <h1 class="rdr-title" id="rdr-title"></h1>
     <span class="rdr-time" id="rdr-time"></span>
     <img class="rdr-hero" id="rdr-hero" alt="" style="display:none">
-    <div class="ai-box">
-      <div class="ai-lbl"><span class="ai-badge">IA</span> Resume automatique</div>
-      <div class="ai-txt dim" id="ai-txt">Generation en cours...</div>
-    </div>
+
     <div class="rdr-desc" id="rdr-desc"></div>
     <a class="rdr-cta" id="rdr-cta" target="_blank" rel="noopener">Lire l'article complet sur le site source</a>
   </div>
@@ -481,43 +474,11 @@ function openReader(el) {
   var descEl = document.getElementById('rdr-desc');
   descEl.textContent = desc || '';
 
-  var aiEl = document.getElementById('ai-txt');
-  aiEl.textContent = 'Generation en cours...';
-  aiEl.className = 'ai-txt dim';
-
   document.getElementById('reader').classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  genSummary(title, desc, src);
 }
 
-async function genSummary(title, desc, src) {
-  var aiEl = document.getElementById('ai-txt');
-  var isFR = (lang !== 'en');
-  var prompt = isFR
-    ? 'Resume factuel 2-3 phrases en francais. Titre: "' + title + '". Contexte: "' + desc + '". Source: ' + src + '. Reponds avec le resume uniquement.'
-    : 'Factual 2-3 sentence summary in English. Title: "' + title + '". Context: "' + desc + '". Source: ' + src + '. Summary only.';
-  try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{ role:'user', content:prompt }] })
-    });
-    var data = await r.json();
-    var txt = '';
-    if (data.content && data.content.length > 0) {
-      for (var i = 0; i < data.content.length; i++) {
-        if (data.content[i].text) txt += data.content[i].text;
-      }
-    }
-    txt = txt.trim();
-    if (txt) { aiEl.textContent = txt; aiEl.className = 'ai-txt'; }
-    else { aiEl.textContent = desc || 'Resume indisponible.'; aiEl.className = 'ai-txt'; }
-  } catch(e) {
-    aiEl.textContent = desc || 'Lire sur le site source.';
-    aiEl.className = 'ai-txt';
-  }
-}
+
 
 function closeReader() {
   document.getElementById('reader').classList.remove('open');
@@ -619,3 +580,4 @@ loadTab('sport', 'fr', false);
 </script>
 </body>
 </html>
+
