@@ -4,18 +4,13 @@ const http = require('http');
 exports.handler = async (event) => {
   const url = event.queryStringParameters && event.queryStringParameters.url;
   if (!url) return { statusCode: 400, body: 'Missing url' };
-
   try {
     const xml = await fetchUrl(url);
     const items = parseRSS(xml);
     return {
       statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=300'
-      },
-      body: JSON.stringify({ items: items.slice(0, 10) })
+      headers: { 'Content-Type':'application/json', 'Access-Control-Allow-Origin':'*', 'Cache-Control':'public, max-age=300' },
+      body: JSON.stringify({ items: items.slice(0, 12) })
     };
   } catch(e) {
     return { statusCode: 500, body: JSON.stringify({ error: e.message, items: [] }) };
@@ -38,15 +33,10 @@ function fetchUrl(url, redirects) {
     }, function(res) {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         var loc = res.headers.location;
-        if (loc.startsWith('/')) {
-          var parsed = new URL(url);
-          loc = parsed.protocol + '//' + parsed.host + loc;
-        }
+        if (loc.startsWith('/')) { var p = new URL(url); loc = p.protocol + '//' + p.host + loc; }
         return fetchUrl(loc, redirects + 1).then(resolve).catch(reject);
       }
-      if (res.statusCode !== 200) {
-        return reject(new Error('HTTP ' + res.statusCode));
-      }
+      if (res.statusCode !== 200) return reject(new Error('HTTP ' + res.statusCode));
       var chunks = [];
       res.on('data', function(c) { chunks.push(c); });
       res.on('end', function() { resolve(Buffer.concat(chunks).toString('utf8')); });
@@ -58,23 +48,19 @@ function fetchUrl(url, redirects) {
 
 function parseRSS(xml) {
   var items = [];
-
-  // Try RSS 2.0
   var itemMatches = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) || [];
-
-  // Try Atom if no RSS items
-  if (itemMatches.length === 0) {
-    itemMatches = xml.match(/<entry[\s>][\s\S]*?<\/entry>/gi) || [];
-  }
-
+  if (itemMatches.length === 0) itemMatches = xml.match(/<entry[\s>][\s\S]*?<\/entry>/gi) || [];
   for (var i = 0; i < itemMatches.length; i++) {
     var block = itemMatches[i];
+    var fullContent = getTag(block, 'content:encoded') || getTag(block, 'content') || '';
     var item = {
       title: getTag(block, 'title'),
       link: getLink(block),
-      description: stripHtml(getTag(block, 'description') || getTag(block, 'summary') || getTag(block, 'content')),
+      description: stripHtml(getTag(block, 'description') || getTag(block, 'summary') || ''),
+      content: fullContent,
       pubDate: getTag(block, 'pubDate') || getTag(block, 'published') || getTag(block, 'updated'),
-      thumbnail: getAttr(block, 'media:thumbnail', 'url') || getAttr(block, 'media:content', 'url') || getEnclosure(block)
+      thumbnail: getAttr(block, 'media:thumbnail', 'url') || getAttr(block, 'media:content', 'url') || getEnclosure(block),
+      videoId: getYoutubeId(getLink(block))
     };
     if (item.title) items.push(item);
   }
@@ -86,26 +72,23 @@ function getTag(xml, tag) {
   var m = xml.match(re);
   if (!m) return '';
   var val = m[1].trim();
-  // Handle CDATA
   var cdata = val.match(/<!\[CDATA\[([\s\S]*?)\]\]>/i);
   if (cdata) return cdata[1].trim();
   return val;
 }
 
 function getLink(xml) {
-  // Atom link
   var atom = xml.match(/<link[^>]+href=["']([^"']+)["'][^>]*rel=["']alternate["']/i)
     || xml.match(/<link[^>]+rel=["']alternate["'][^>]+href=["']([^"']+)["']/i)
     || xml.match(/<link[^>]+href=["']([^"']+)["']/i);
   if (atom) return atom[1];
-  // RSS link
   var rss = xml.match(/<link[^>]*>(https?:\/\/[^<]+)<\/link>/i);
   if (rss) return rss[1].trim();
   return '';
 }
 
 function getAttr(xml, tag, attr) {
-  var re = new RegExp('<' + tag + '[^>]+' + attr + '=["\'](.*?)["\']', 'i');
+  var re = new RegExp('<' + tag + '[^>]+' + attr + '=["\\'](.*?)["\']', 'i');
   var m = xml.match(re);
   return m ? m[1] : '';
 }
@@ -116,7 +99,13 @@ function getEnclosure(xml) {
   return m ? m[1] : '';
 }
 
+function getYoutubeId(url) {
+  if (!url) return '';
+  var m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : '';
+}
+
 function stripHtml(html) {
   if (!html) return '';
-  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 400);
 }

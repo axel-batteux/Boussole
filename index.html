@@ -7,8 +7,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Boussole">
-<meta name="description" content="Boussole — Agrégateur d'actualités personnalisé. Sport, Rap, Monde, Tech et bonnes nouvelles en un seul endroit.">
+<meta name="description" content="Boussole — Votre agrégateur d'actualités personnalisé. Sport, Rap, Monde, Tech et bonnes nouvelles.">
 <title>Boussole</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,700;1,400&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,14 +18,18 @@
 </head>
 <body>
 
+<!-- Splash Screen -->
+<div id="splash">
+  <div class="splash-icon">🧭</div>
+  <div class="splash-title">Boussole</div>
+  <div class="splash-sub">L'info qui compte</div>
+</div>
+
 <!-- Install Banner -->
 <div id="install-banner">
   <div class="ib-row">
-    <div class="ib-icon">&#x1F9ED;</div>
-    <div>
-      <div class="ib-title">Installer Boussole</div>
-      <div class="ib-sub">Accès rapide depuis l'écran d'accueil</div>
-    </div>
+    <div class="ib-icon">🧭</div>
+    <div><div class="ib-title">Installer Boussole</div><div class="ib-sub">Accès rapide depuis l'écran d'accueil</div></div>
   </div>
   <div class="ib-hint" id="ib-hint">Sur iPhone : appuie sur Partager puis "Ajouter à l'écran d'accueil"</div>
   <div class="ib-btns">
@@ -32,45 +38,88 @@
   </div>
 </div>
 
-<!-- Reader Overlay -->
+<!-- Flash Info -->
+<div class="flash-container" id="flash">
+  <div class="flash-top" id="flash-bars"></div>
+  <div class="flash-slide" id="flash-slide">
+    <button class="flash-close" id="flash-close">✕</button>
+    <div class="flash-chip" id="flash-chip"></div>
+    <div class="flash-title" id="flash-title"></div>
+    <div class="flash-desc" id="flash-desc"></div>
+  </div>
+  <div class="flash-nav"><div class="flash-nav-l" id="flash-prev"></div><div class="flash-nav-r" id="flash-next"></div></div>
+</div>
+
+<!-- Zen Mode -->
+<div class="zen-container" id="zen">
+  <div class="zen-hdr">
+    <button class="rdr-back" id="zen-close">←</button>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">Mode Zen</span>
+    <span class="zen-counter" id="zen-counter"></span>
+  </div>
+  <div class="zen-body">
+    <div class="zen-src" id="zen-src"></div>
+    <div class="zen-title" id="zen-title"></div>
+    <div class="zen-desc" id="zen-desc"></div>
+  </div>
+  <div class="zen-footer">
+    <button class="zen-btn" id="zen-prev">← Précédent</button>
+    <button class="zen-btn primary" id="zen-next">Suivant →</button>
+  </div>
+</div>
+
+<!-- Reader -->
 <div id="reader">
   <div class="rdr-progress" id="rdr-progress"></div>
   <div class="rdr-hdr">
-    <button class="rdr-back" id="rdr-back" aria-label="Retour">&#8592;</button>
+    <button class="rdr-back" id="rdr-back" aria-label="Retour">←</button>
     <span class="rdr-src" id="rdr-src"></span>
     <div class="rdr-actions">
       <button class="rdr-action-btn" id="rdr-fav" aria-label="Sauvegarder">♡</button>
       <button class="rdr-action-btn" id="rdr-share" aria-label="Partager">↗</button>
-      <a class="rdr-ext" id="rdr-ext" target="_blank" rel="noopener">Ouvrir &#x2197;</a>
+      <a class="rdr-ext" id="rdr-ext" target="_blank" rel="noopener">Source ↗</a>
     </div>
   </div>
   <div class="rdr-body">
     <h1 class="rdr-title" id="rdr-title"></h1>
     <span class="rdr-time" id="rdr-time"></span>
     <img class="rdr-hero" id="rdr-hero" alt="" style="display:none">
+    <div class="rdr-video" id="rdr-video" style="display:none"></div>
+    <div class="rdr-content" id="rdr-content"></div>
     <div class="rdr-desc" id="rdr-desc"></div>
-    <a class="rdr-cta" id="rdr-cta" target="_blank" rel="noopener">Lire l'article complet sur le site source</a>
+    <a class="rdr-cta" id="rdr-cta" target="_blank" rel="noopener">Lire sur le site source</a>
   </div>
 </div>
 
 <!-- Favorites Panel -->
-<div id="favs-panel">
+<div class="overlay" id="favs-panel">
   <div class="rdr-hdr">
-    <button class="rdr-back" id="favs-back" aria-label="Retour">&#8592;</button>
-    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">🔖 Favoris</span>
+    <button class="rdr-back" id="favs-back">←</button>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">🔖 Favoris</span>
   </div>
   <div class="rdr-body" id="favs-list"></div>
+</div>
+
+<!-- Stats Panel -->
+<div class="overlay" id="stats-panel">
+  <div class="rdr-hdr">
+    <button class="rdr-back" id="stats-back">←</button>
+    <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">📊 Mes stats</span>
+  </div>
+  <div class="rdr-body" id="stats-content"></div>
 </div>
 
 <!-- Header -->
 <header>
   <div class="header-top">
-    <div class="logo">&#x1F9ED; Boussole</div>
+    <div class="logo">🧭 Boussole</div>
     <div class="header-actions">
-      <button class="fav-btn" id="fav-btn" aria-label="Favoris">
-        🔖
-        <span class="fav-badge" id="fav-badge"></span>
-      </button>
+      <button class="hdr-btn" id="flash-btn" aria-label="Flash Info" title="Flash Info">⚡</button>
+      <button class="hdr-btn" id="zen-btn" aria-label="Mode Zen" title="Mode Zen">🌙</button>
+      <button class="hdr-btn" id="search-btn" aria-label="Recherche" title="Recherche">🔍</button>
+      <button class="hdr-btn" id="stats-btn" aria-label="Stats" title="Stats">📊</button>
+      <button class="hdr-btn" id="fav-btn" aria-label="Favoris" title="Favoris">🔖<span class="fav-badge" id="fav-badge"></span></button>
+      <button class="hdr-btn" id="theme-btn" aria-label="Thème">🌙</button>
       <div class="lang-sw">
         <button class="lng on" data-l="fr">FR</button>
         <button class="lng" data-l="en">EN</button>
@@ -78,14 +127,20 @@
       </div>
     </div>
   </div>
+  <div class="search-row" id="search-row">
+    <input class="search-input" id="search-input" type="text" placeholder="Rechercher dans le fil...">
+  </div>
   <div class="tabs-row" role="tablist">
-    <button class="tb on" data-tab="sport" role="tab" aria-selected="true">Sport</button>
-    <button class="tb" data-tab="rap" role="tab" aria-selected="false">Rap</button>
-    <button class="tb" data-tab="monde" role="tab" aria-selected="false">Monde</button>
-    <button class="tb" data-tab="good" role="tab" aria-selected="false">Good News</button>
-    <button class="tb" data-tab="tech" role="tab" aria-selected="false">Tech</button>
+    <button class="tb on" data-tab="sport" role="tab">Sport</button>
+    <button class="tb" data-tab="rap" role="tab">Rap</button>
+    <button class="tb" data-tab="monde" role="tab">Monde</button>
+    <button class="tb" data-tab="good" role="tab">Good News</button>
+    <button class="tb" data-tab="tech" role="tab">Tech</button>
   </div>
 </header>
+
+<!-- Trending -->
+<div class="trending-row" id="trending"></div>
 
 <!-- Main Content -->
 <main>
