@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#080809">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Boussole">
+<title>Boussole</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;700&family=Syne:wght@700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#080809; --s2:#161619; --s3:#1e1e24; --b1:#26262e; --t1:#eeeef4; --t2:#9898ac; --t3:#55556a; --t4:#33333f; --sport:#f0c04a; --rap:#b06aff; --monde:#4a9ef0; --good:#3ed98a; --tech:#f04a6a; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { background:var(--bg); color:var(--t1); font-family:'Syne',sans-serif; min-height:100vh; }
+header { position:sticky; top:0; z-index:90; background:rgba(8,8,9,.96); border-bottom:1px solid var(--b1); }
+.header-top { display:flex; align-items:center; justify-content:space-between; height:52px; padding:0 16px; }
+.logo { font-family:'Newsreader',serif; font-size:21px; font-weight:700; color:var(--t1); }
+.lang-sw { display:flex; background:var(--s3); border:1px solid var(--b1); border-radius:10px; padding:3px; gap:2px; }
+.lng { padding:5px 10px; border:none; background:transparent; color:var(--t3); font-family:'JetBrains Mono',monospace; font-size:10px; cursor:pointer; border-radius:7px; font-weight:500; }
+.lng.on { background:var(--sport); color:#080809; }
+.tabs-row { display:flex; overflow-x:auto; scrollbar-width:none; padding:0 6px; }
+.tabs-row::-webkit-scrollbar { display:none; }
+.tb { padding:12px 14px 11px; border:none; background:transparent; color:var(--t3); font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent; margin-bottom:-1px; }
+.tb.on { color:var(--t1); border-bottom-color:var(--sport); }
+.tb[data-tab="rap"].on { border-bottom-color:var(--rap); }
+.tb[data-tab="monde"].on { border-bottom-color:var(--monde); }
+.tb[data-tab="good"].on { border-bottom-color:var(--good); }
+.tb[data-tab="tech"].on { border-bottom-color:var(--tech); }
+main { max-width:680px; margin:0 auto; padding-bottom:80px; }
+.panel { display:none; }
+.panel.on { display:block; }
+.sec-lbl { display:flex; align-items:center; gap:10px; padding:20px 16px 12px; }
+.sec-lbl-t { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.15em; text-transform:uppercase; color:var(--t3); }
+.sec-lbl-l { flex:1; height:1px; background:var(--b1); }
+.sec-lbl-n { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4); }
+.art { border-bottom:1px solid var(--b1); cursor:pointer; padding:16px; display:grid; grid-template-columns:1fr 68px; gap:12px; align-items:start; }
+.art.hero { grid-template-columns:1fr; padding:20px 16px; }
+.art:active { background:var(--s2); }
+.art-meta { display:flex; align-items:center; gap:7px; margin-bottom:8px; flex-wrap:wrap; }
+.chip { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; text-transform:uppercase; border:1px solid currentColor; border-radius:4px; padding:2px 6px; }
+.art-age { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4); }
+.art-title { font-family:'Newsreader',serif; font-size:16px; line-height:1.45; color:var(--t1); font-weight:400; }
+.art.hero .art-title { font-size:21px; line-height:1.35; font-weight:700; }
+.art-desc { margin-top:6px; font-size:13px; line-height:1.6; color:var(--t2); font-family:'Newsreader',serif; font-style:italic; }
+.art-thumb { width:68px; height:54px; border-radius:7px; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:20px; overflow:hidden; }
+.art-thumb img { width:100%; height:100%; object-fit:cover; }
+.hero-img { width:100%; height:180px; border-radius:10px; overflow:hidden; margin-top:14px; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:44px; }
+.hero-img img { width:100%; height:100%; object-fit:cover; }
+.mini { display:flex; align-items:flex-start; gap:10px; padding:13px 16px; border-bottom:1px solid var(--b1); cursor:pointer; }
+.mini:active { background:var(--s2); }
+.mini-dot { width:4px; height:4px; border-radius:50%; background:var(--sport); flex-shrink:0; margin-top:6px; }
+.mini-t { font-size:13px; color:var(--t2); line-height:1.45; flex:1; font-family:'Newsreader',serif; }
+.mini-s { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4); white-space:nowrap; align-self:center; }
+.end { text-align:center; padding:48px 20px; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.15em; color:var(--t4); text-transform:uppercase; }
+.loader { display:flex; flex-direction:column; align-items:center; gap:14px; padding:56px 20px; }
+.ltrack { width:100px; height:2px; background:var(--b1); border-radius:2px; overflow:hidden; }
+.ltrack::after { content:''; display:block; height:100%; width:40%; background:var(--sport); animation:sweep 1s ease-in-out infinite; }
+@keyframes sweep { 0% { transform:translateX(-150%); } 100% { transform:translateX(400%); } }
+.llbl { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4); letter-spacing:.12em; text-transform:uppercase; }
+#reader { position:fixed; inset:0; z-index:200; background:var(--bg); transform:translateY(100%); transition:transform .36s ease; overflow-y:auto; }
+#reader.open { transform:translateY(0); }
+.rdr-hdr { position:sticky; top:0; background:rgba(8,8,9,.96); border-bottom:1px solid var(--b1); display:flex; align-items:center; gap:10px; padding:12px 16px; }
+.rdr-back { width:36px; height:36px; border-radius:50%; background:var(--s3); border:1px solid var(--b1); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:var(--t1); flex-shrink:0; }
+.rdr-src { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; text-transform:uppercase; border:1px solid currentColor; border-radius:4px; padding:3px 7px; }
+.rdr-ext { margin-left:auto; padding:6px 12px; background:var(--s3); border:1px solid var(--b1); border-radius:7px; color:var(--t2); font-family:'JetBrains Mono',monospace; font-size:9px; text-decoration:none; white-space:nowrap; }
+.rdr-body { max-width:640px; margin:0 auto; padding:28px 20px 80px; }
+.rdr-title { font-family:'Newsreader',serif; font-size:24px; line-height:1.3; font-weight:700; color:var(--t1); margin-bottom:14px; }
+.rdr-time { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t3); display:block; margin-bottom:20px; }
+.rdr-hero { width:100%; max-height:240px; border-radius:10px; object-fit:cover; margin-bottom:20px; }
+.ai-box { background:var(--s2); border-left:3px solid var(--sport); border-radius:0 8px 8px 0; padding:16px; margin-bottom:24px; }
+.ai-lbl { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--t3); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.ai-badge { background:var(--sport); color:#080809; font-size:8px; font-weight:700; padding:2px 6px; border-radius:4px; }
+.ai-txt { font-family:'Newsreader',serif; font-size:14px; line-height:1.75; color:var(--t2); font-style:italic; }
+.ai-txt.dim { color:var(--t4); }
+.rdr-desc { font-family:'Newsreader',serif; font-size:16px; line-height:1.8; color:var(--t1); }
+.rdr-cta { display:block; text-align:center; padding:16px; margin-top:32px; background:var(--s2); border:1px solid var(--b1); border-radius:10px; text-decoration:none; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t2); letter-spacing:.08em; text-transform:uppercase; }
+.refresh-row { display:flex; align-items:center; justify-content:space-between; padding:10px 16px 0; }
+.refresh-btn { padding:6px 12px; background:transparent; border:1px solid var(--b1); border-radius:7px; color:var(--t3); font-family:'JetBrains Mono',monospace; font-size:9px; text-transform:uppercase; cursor:pointer; }
+.last-upd { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--t4); }
+#install-banner { display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:999; background:var(--s3); border:1px solid var(--b1); border-radius:16px; padding:16px; width:calc(100% - 32px); max-width:440px; box-shadow:0 20px 60px rgba(0,0,0,.7); }
+.ib-row { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.ib-icon { width:44px; height:44px; background:var(--sport); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.ib-title { font-size:14px; font-weight:700; }
+.ib-sub { font-size:11px; color:var(--t2); font-family:'JetBrains Mono',monospace; }
+.ib-hint { display:none; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t2); text-align:center; background:var(--s2); border-radius:8px; padding:10px; margin-bottom:12px; line-height:1.6; }
+.ib-btns { display:flex; gap:8px; }
+.ib-inst { flex:1; padding:11px; background:var(--sport); color:#080809; border:none; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; }
+.ib-dism { padding:11px 16px; background:var(--b1); color:var(--t2); border:none; border-radius:9px; font-size:11px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div id="install-banner">
+  <div class="ib-row">
+    <div class="ib-icon">&#x1F9ED;</div>
+    <div>
+      <div class="ib-title">Installer Boussole</div>
+      <div class="ib-sub">Acces rapide depuis l'ecran d'accueil</div>
+    </div>
+  </div>
+  <div class="ib-hint" id="ib-hint">Sur iPhone : appuie sur Partager puis "Ajouter a l'ecran d'accueil"</div>
+  <div class="ib-btns">
+    <button class="ib-inst" id="ib-inst">Installer</button>
+    <button class="ib-dism" id="ib-dism">Plus tard</button>
+  </div>
+</div>
+
+<div id="reader">
+  <div class="rdr-hdr">
+    <button class="rdr-back" id="rdr-back">&#8592;</button>
+    <span class="rdr-src" id="rdr-src"></span>
+    <a class="rdr-ext" id="rdr-ext" target="_blank" rel="noopener">Ouvrir &#x2197;</a>
+  </div>
+  <div class="rdr-body">
+    <h1 class="rdr-title" id="rdr-title"></h1>
+    <span class="rdr-time" id="rdr-time"></span>
+    <img class="rdr-hero" id="rdr-hero" alt="" style="display:none">
+    <div class="ai-box">
+      <div class="ai-lbl"><span class="ai-badge">IA</span> Resume automatique</div>
+      <div class="ai-txt dim" id="ai-txt">Generation en cours...</div>
+    </div>
+    <div class="rdr-desc" id="rdr-desc"></div>
+    <a class="rdr-cta" id="rdr-cta" target="_blank" rel="noopener">Lire l'article complet sur le site source</a>
+  </div>
+</div>
+
+<header>
+  <div class="header-top">
+    <div class="logo">&#x1F9ED; Boussole</div>
+    <div class="lang-sw">
+      <button class="lng on" data-l="fr">FR</button>
+      <button class="lng" data-l="en">EN</button>
+      <button class="lng" data-l="mix">Mix</button>
+    </div>
+  </div>
+  <div class="tabs-row">
+    <button class="tb on" data-tab="sport">Sport</button>
+    <button class="tb" data-tab="rap">Rap</button>
+    <button class="tb" data-tab="monde">Monde</button>
+    <button class="tb" data-tab="good">Good News</button>
+    <button class="tb" data-tab="tech">Tech</button>
+  </div>
+</header>
+
+<main>
+  <div class="panel on" id="p-sport"></div>
+  <div class="panel" id="p-rap"></div>
+  <div class="panel" id="p-monde"></div>
+  <div class="panel" id="p-good"></div>
+  <div class="panel" id="p-tech"></div>
+</main>
+
+<script>
+var lang = 'fr';
+var tab = 'sport';
+var cache = {};
+var deferredPrompt = null;
+
+var COLORS = { sport:'var(--sport)', rap:'var(--rap)', monde:'var(--monde)', good:'var(--good)', tech:'var(--tech)' };
+
+var FEEDS = {
+  sport: {
+    fr: {
+      main: [
+        { url:'https://www.lequipe.fr/rss/actu-generale_RSS2.xml', src:"L'Equipe", c:'var(--sport)' },
+        { url:'https://www.sofoot.com/rss.xml', src:'SoFoot', c:'var(--sport)' }
+      ],
+      omni: [{ url:'https://www.eurosport.fr/rss/actuali/eed.xml', src:'Eurosport', c:'var(--sport)' }]
+    },
+    en: {
+      main: [
+        { url:'https://feeds.bbci.co.uk/sport/football/rss.xml', src:'BBC Football', c:'var(--sport)' },
+        { url:'https://www.skysports.com/rss/12040', src:'Sky Sports', c:'var(--sport)' }
+      ],
+      omni: [{ url:'https://www.espn.com/espn/rss/news', src:'ESPN', c:'var(--sport)' }]
+    }
+  },
+  rap: {
+    fr: [
+      { url:'https://www.booska-p.com/feed/', src:'Booska-P', c:'var(--rap)' },
+      { url:'https://www.mouv.fr/rss/actualites', src:"Mouv", c:'var(--rap)' }
+    ],
+    en: [
+      { url:'https://www.complex.com/music/rss', src:'Complex', c:'var(--rap)' },
+      { url:'https://www.xxlmag.com/feed/', src:'XXL', c:'var(--rap)' }
+    ]
+  },
+  monde: {
+    fr: [{ url:'https://www.lemonde.fr/rss/une.xml', src:'Le Monde', c:'var(--monde)' }],
+    en: [
+      { url:'https://feeds.reuters.com/reuters/topNews', src:'Reuters', c:'var(--monde)' },
+      { url:'https://apnews.com/rss/apf-topnews', src:'AP News', c:'var(--monde)' }
+    ]
+  },
+  good: {
+    fr: [{ url:'https://www.lemediapositif.com/feed/', src:'Le Media Positif', c:'var(--good)' }],
+    en: [{ url:'https://www.goodnewsnetwork.org/feed/', src:'Good News Network', c:'var(--good)' }]
+  },
+  tech: {
+    fr: [
+      { url:'https://www.lesnumeriques.com/actu_0.rss', src:'Les Numeriques', c:'var(--tech)' },
+      { url:'https://feeds.lesechos.fr/rss/rss_tech.xml', src:'Les Echos Tech', c:'var(--tech)' }
+    ],
+    en: [
+      { url:'https://techcrunch.com/feed/', src:'TechCrunch', c:'var(--tech)' },
+      { url:'https://feeds.bloomberg.com/technology/news.rss', src:'Bloomberg', c:'var(--tech)' }
+    ]
+  }
+};
+
+function timeAgo(s) {
+  if (!s) return '';
+  var d = new Date(s);
+  var m = Math.floor((Date.now() - d) / 60000);
+  if (isNaN(m) || m < 0) return '';
+  if (m < 2) return 'A instant';
+  if (m < 60) return 'Il y a ' + m + 'min';
+  var h = Math.floor(m / 60);
+  if (h < 24) return 'Il y a ' + h + 'h';
+  return 'Il y a ' + Math.floor(h / 24) + 'j';
+}
+
+function clean(h) {
+  if (!h) return '';
+  var d = document.createElement('div');
+  d.innerHTML = h;
+  var t = d.textContent || d.innerText || '';
+  return t.replace(/\s+/g, ' ').trim().slice(0, 260);
+}
+
+async function fetchFeed(feed, max) {
+  if (!max) max = 6;
+  var enc = encodeURIComponent(feed.url);
+  var urls = [
+    '/.netlify/functions/rss?url=' + enc,
+    'https://api.rss2json.com/v1/api.json?rss_url=' + enc
+  ];
+  for (var i = 0; i < urls.length; i++) {
+    try {
+      var resp = await fetch(urls[i], { signal: AbortSignal.timeout(8000) });
+      var data = await resp.json();
+      var items = data.items || [];
+      if (items.length === 0) continue;
+      var result = [];
+      for (var j = 0; j < Math.min(items.length, max); j++) {
+        var it = items[j];
+        result.push({
+          title: clean(it.title || ''),
+          desc: clean(it.description || it.content || it.summary || ''),
+          link: it.link || it.url || '#',
+          age: timeAgo(it.pubDate || it.published || it.updated || ''),
+          src: feed.src,
+          c: feed.c,
+          thumb: it.thumbnail || (it.enclosure ? it.enclosure.link : '') || ''
+        });
+      }
+      return result;
+    } catch(e) { continue; }
+  }
+  return [];
+}
+
+async function fetchAll(feeds, max) {
+  if (!max) max = 5;
+  var promises = [];
+  for (var i = 0; i < feeds.length; i++) {
+    promises.push(fetchFeed(feeds[i], max));
+  }
+  var results = await Promise.allSettled(promises);
+  var all = [];
+  for (var j = 0; j < results.length; j++) {
+    if (results[j].status === 'fulfilled') {
+      all = all.concat(results[j].value);
+    }
+  }
+  return all;
+}
+
+function nowStr() {
+  return new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function makeRefreshRow(t) {
+  return '<div class="refresh-row">'
+    + '<span class="last-upd">Mis a jour ' + nowStr() + '</span>'
+    + '<button class="refresh-btn" onclick="doRefresh(\'' + t + '\')">Rafraichir</button>'
+    + '</div>';
+}
+
+function makeSecLbl(icon, text, n) {
+  return '<div class="sec-lbl">'
+    + '<span class="sec-lbl-t">' + icon + ' ' + text + '</span>'
+    + '<div class="sec-lbl-l"></div>'
+    + '<span class="sec-lbl-n">' + n + ' articles</span>'
+    + '</div>';
+}
+
+function makeEnd() {
+  return '<div class="end">' + (lang === 'en' ? 'End of feed' : 'Fin du fil') + '</div>';
+}
+
+function makeCard(a, hero) {
+  var imgHtml = '';
+  if (hero) {
+    imgHtml = '<div class="hero-img">' + (a.thumb ? '<img src="' + a.thumb + '" alt="" loading="lazy">' : '') + '</div>';
+  } else {
+    imgHtml = '<div class="art-thumb">' + (a.thumb ? '<img src="' + a.thumb + '" alt="" loading="lazy">' : '') + '</div>';
+  }
+  var freshDot = '';
+  if (a.age && (a.age.indexOf('min') > -1 || a.age.indexOf('1h') > -1 || a.age.indexOf('2h') > -1)) {
+    freshDot = '<span style="width:5px;height:5px;border-radius:50%;background:var(--good);display:inline-block;box-shadow:0 0 6px var(--good)"></span>';
+  }
+  var inner = '<div>'
+    + '<div class="art-meta">'
+    + '<span class="chip" style="color:' + a.c + '">' + a.src + '</span>'
+    + freshDot
+    + '<span class="art-age">' + a.age + '</span>'
+    + '</div>'
+    + '<div class="art-title">' + a.title + '</div>'
+    + (hero && a.desc ? '<div class="art-desc">' + a.desc + '</div>' : '')
+    + '</div>';
+  var grid = hero
+    ? inner + imgHtml
+    : inner + imgHtml;
+  return '<div class="art' + (hero ? ' hero' : '') + '"'
+    + ' data-link="' + (a.link || '#') + '"'
+    + ' data-title="' + encodeURIComponent(a.title || '') + '"'
+    + ' data-src="' + (a.src || '') + '"'
+    + ' data-c="' + (a.c || 'var(--sport)') + '"'
+    + ' data-age="' + (a.age || '') + '"'
+    + ' data-desc="' + encodeURIComponent(a.desc || '') + '"'
+    + ' data-thumb="' + (a.thumb || '') + '">'
+    + grid
+    + '</div>';
+}
+
+function makeMini(a) {
+  return '<div class="mini"'
+    + ' data-link="' + (a.link || '#') + '"'
+    + ' data-title="' + encodeURIComponent(a.title || '') + '"'
+    + ' data-src="' + (a.src || '') + '"'
+    + ' data-c="var(--sport)"'
+    + ' data-age="' + (a.age || '') + '"'
+    + ' data-desc="" data-thumb="">'
+    + '<div class="mini-dot"></div>'
+    + '<div class="mini-t">' + a.title + '</div>'
+    + '<span class="mini-s">' + a.src + '</span>'
+    + '</div>';
+}
+
+function buildSport(mains, omnis) {
+  var h = makeRefreshRow('sport');
+  h += makeSecLbl('&#x26BD;', 'Football', mains.length);
+  if (mains.length > 0) {
+    h += makeCard(mains[0], true);
+    for (var i = 1; i < mains.length; i++) h += makeCard(mains[i], false);
+  } else {
+    h += '<p style="padding:32px 16px;text-align:center;font-size:12px;color:var(--t4)">Chargement impossible. Verifiez votre connexion.</p>';
+  }
+  if (omnis.length > 0) {
+    h += makeSecLbl('&#x1F3C5;', 'Omnisport', omnis.length);
+    for (var j = 0; j < omnis.length; j++) h += makeMini(omnis[j]);
+  }
+  h += makeEnd();
+  return h;
+}
+
+function buildSimple(t, arts) {
+  var cfg = {
+    rap: { icon:'&#x1F3A4;', label:'Rap et Culture' },
+    monde: { icon:'&#x1F30D;', label:'Actualite mondiale' },
+    good: { icon:'&#x2728;', label:'Bonnes nouvelles' },
+    tech: { icon:'&#x26A1;', label:'Tech et Finance' }
+  };
+  var c = cfg[t] || { icon:'', label:t };
+  var h = makeRefreshRow(t);
+  h += makeSecLbl(c.icon, c.label, arts.length);
+  if (arts.length > 0) {
+    h += makeCard(arts[0], true);
+    for (var i = 1; i < arts.length; i++) h += makeCard(arts[i], false);
+  } else {
+    h += '<p style="padding:32px 16px;text-align:center;font-size:12px;color:var(--t4)">Chargement impossible. Verifiez votre connexion.</p>';
+  }
+  h += makeEnd();
+  return h;
+}
+
+async function loadTab(t, l, force) {
+  var key = t + '|' + l;
+  var el = document.getElementById('p-' + t);
+  if (!el) return;
+  if (cache[key] && !force) { el.innerHTML = cache[key]; bindCards(); return; }
+  el.innerHTML = '<div class="loader"><div class="ltrack"></div><div class="llbl">Chargement...</div></div>';
+  var ef = (l === 'mix') ? (Math.random() > 0.5 ? 'fr' : 'en') : l;
+  var html = '';
+  try {
+    if (t === 'sport') {
+      var cfg = FEEDS.sport[ef] || FEEDS.sport.fr;
+      var r = await Promise.all([fetchAll(cfg.main, 5), fetchAll(cfg.omni, 4)]);
+      html = buildSport(r[0], r[1]);
+    } else {
+      var fds = (FEEDS[t] && (FEEDS[t][ef] || FEEDS[t].fr)) || [];
+      var arts = await fetchAll(fds, 6);
+      html = buildSimple(t, arts);
+    }
+  } catch(e) {
+    html = '<p style="padding:32px 16px;text-align:center;font-size:12px;color:var(--t4)">Erreur de chargement.</p>';
+  }
+  cache[key] = html;
+  el.innerHTML = html;
+  bindCards();
+}
+
+function doRefresh(t) {
+  delete cache[t + '|' + lang];
+  loadTab(t, lang, true);
+}
+
+function openReader(el) {
+  var title = decodeURIComponent(el.getAttribute('data-title') || '');
+  var src = el.getAttribute('data-src') || '';
+  var c = el.getAttribute('data-c') || 'var(--sport)';
+  var age = el.getAttribute('data-age') || '';
+  var desc = decodeURIComponent(el.getAttribute('data-desc') || '');
+  var thumb = el.getAttribute('data-thumb') || '';
+  var link = el.getAttribute('data-link') || '#';
+
+  document.getElementById('rdr-title').textContent = title;
+  var srcEl = document.getElementById('rdr-src');
+  srcEl.textContent = src;
+  srcEl.style.color = c;
+  srcEl.style.borderColor = c;
+  document.getElementById('rdr-time').textContent = age;
+  document.getElementById('rdr-ext').href = link;
+  document.getElementById('rdr-cta').href = link;
+
+  var hero = document.getElementById('rdr-hero');
+  if (thumb) { hero.src = thumb; hero.style.display = 'block'; hero.onerror = function() { hero.style.display = 'none'; }; }
+  else { hero.style.display = 'none'; }
+
+  var descEl = document.getElementById('rdr-desc');
+  descEl.textContent = desc || '';
+
+  var aiEl = document.getElementById('ai-txt');
+  aiEl.textContent = 'Generation en cours...';
+  aiEl.className = 'ai-txt dim';
+
+  document.getElementById('reader').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  genSummary(title, desc, src);
+}
+
+async function genSummary(title, desc, src) {
+  var aiEl = document.getElementById('ai-txt');
+  var isFR = (lang !== 'en');
+  var prompt = isFR
+    ? 'Resume factuel 2-3 phrases en francais. Titre: "' + title + '". Contexte: "' + desc + '". Source: ' + src + '. Reponds avec le resume uniquement.'
+    : 'Factual 2-3 sentence summary in English. Title: "' + title + '". Context: "' + desc + '". Source: ' + src + '. Summary only.';
+  try {
+    var r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:300, messages:[{ role:'user', content:prompt }] })
+    });
+    var data = await r.json();
+    var txt = '';
+    if (data.content && data.content.length > 0) {
+      for (var i = 0; i < data.content.length; i++) {
+        if (data.content[i].text) txt += data.content[i].text;
+      }
+    }
+    txt = txt.trim();
+    if (txt) { aiEl.textContent = txt; aiEl.className = 'ai-txt'; }
+    else { aiEl.textContent = desc || 'Resume indisponible.'; aiEl.className = 'ai-txt'; }
+  } catch(e) {
+    aiEl.textContent = desc || 'Lire sur le site source.';
+    aiEl.className = 'ai-txt';
+  }
+}
+
+function closeReader() {
+  document.getElementById('reader').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('rdr-back').addEventListener('click', closeReader);
+
+var _ty = 0, _ts = 0;
+document.getElementById('reader').addEventListener('touchstart', function(e) {
+  _ty = e.touches[0].clientY;
+  _ts = document.getElementById('reader').scrollTop;
+}, { passive: true });
+document.getElementById('reader').addEventListener('touchmove', function(e) {
+  if (_ts === 0 && e.touches[0].clientY - _ty > 70) closeReader();
+}, { passive: true });
+
+function bindCards() {
+  var cards = document.querySelectorAll('.art, .mini');
+  for (var i = 0; i < cards.length; i++) {
+    (function(el) {
+      el.addEventListener('click', function() { openReader(el); });
+    })(cards[i]);
+  }
+}
+
+function switchTab(t) {
+  tab = t;
+  var tabs = document.querySelectorAll('.tb');
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].classList.toggle('on', tabs[i].getAttribute('data-tab') === t);
+  }
+  var panels = document.querySelectorAll('.panel');
+  for (var j = 0; j < panels.length; j++) {
+    panels[j].classList.toggle('on', panels[j].id === 'p-' + t);
+  }
+  if (!cache[t + '|' + lang]) loadTab(t, lang, false);
+  else bindCards();
+}
+
+function switchLang(l) {
+  lang = l;
+  cache = {};
+  var btns = document.querySelectorAll('.lng');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.toggle('on', btns[i].getAttribute('data-l') === l);
+  }
+  loadTab(tab, lang, false);
+}
+
+var tbBtns = document.querySelectorAll('.tb');
+for (var i = 0; i < tbBtns.length; i++) {
+  (function(btn) {
+    btn.addEventListener('click', function() { switchTab(btn.getAttribute('data-tab')); });
+  })(tbBtns[i]);
+}
+
+var lngBtns = document.querySelectorAll('.lng');
+for (var i = 0; i < lngBtns.length; i++) {
+  (function(btn) {
+    btn.addEventListener('click', function() { switchLang(btn.getAttribute('data-l')); });
+  })(lngBtns[i]);
+}
+
+var banner = document.getElementById('install-banner');
+
+function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+function isStandalone() { return navigator.standalone || window.matchMedia('(display-mode: standalone)').matches; }
+
+if (!isStandalone()) {
+  if (isIOS()) {
+    window.setTimeout(function() {
+      banner.style.display = 'block';
+      document.getElementById('ib-hint').style.display = 'block';
+      document.getElementById('ib-inst').style.display = 'none';
+    }, 4000);
+  }
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    window.setTimeout(function() { banner.style.display = 'block'; }, 4000);
+  });
+}
+
+document.getElementById('ib-inst').addEventListener('click', function() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function() {
+    deferredPrompt = null;
+    banner.style.display = 'none';
+  });
+});
+
+document.getElementById('ib-dism').addEventListener('click', function() {
+  banner.style.display = 'none';
+});
+
+loadTab('sport', 'fr', false);
+</script>
+</body>
+</html>
